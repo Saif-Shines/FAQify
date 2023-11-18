@@ -1,0 +1,15 @@
+{
+  "name": "faqify",
+  "module": "index.js",
+  "type": "module",
+  "devDependencies": {
+    "bun-types": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.38.4",
+    "langchain": "^0.0.192"
+  }
+}
