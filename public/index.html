@@ -5,12 +5,33 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="index.css">
-  <title>Document</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins&family=Roboto&display=swap" rel="stylesheet">
+  <title>FAQify</title>
 </head>
 
 <body>
-  <h1>Hello LangChain</h1>
+  <main>
+    <section class="chatbot-container">
+      <div class="chatbot-header">
+        <img src="images/logo.svg" alt="Knowledge Bank">
+        <p class="sub-heading">Knowledge Bank</p>
+
+      </div>
+      <div class="chatbot-conversation-container" id="chatbot-conversation-container">
+      </div>
+      <form id="form" class="chatbot-input-container">
+        <label for="user-input">User Input:</label>
+        <input name="user-input" type="text" id="user-input" required>
+        <button id="submit-btn" class="submit-btn">
+          <img src="images/send.svg" alt="Image Description">
+        </button>
+        </button>
+      </form>
+    </section>
+  </main>
+  <script src="index.js" type="module"></script>
 </body>
-<script src="index.js"></script>
 
 </html>
