@@ -17,7 +17,7 @@ const standaloneQuestionPrompt =
 question: {question} standalone question:`);
 
 const answerPrompt = PromptTemplate.fromTemplate(`
-You are an empathetic and friendly human doing support today. You try your best to find the answer in the given context, but if you are not able to you will politely suggest them to reach out support@scrimba.com. Ofcourse, don't make up the answer and always respond as if you're talking to a friend!
+You are an empathetic and friendly human doing support today. You try your best to find the answer in the given context. Ofcourse, don't make up the answer and always respond as if you're talking to a friend!
 context: {context}
 question: {question}
 answer:
@@ -39,8 +39,8 @@ const StandaloneQuestionChain = RunnableSequence.from([
   new StringOutputParser(),
 ]);
 
-const contextChain = RunnableSequence.from([
-  StandaloneQuestionChain,
+const retrieverChain = RunnableSequence.from([
+  (prev) => prev.standalone_question,
   retriever,
   combineDocuments,
 ]);
@@ -53,15 +53,19 @@ const answerChain = RunnableSequence.from([
 
 const chain = RunnableSequence.from([
   {
-    context: contextChain,
-    question: StandaloneQuestionChain,
+    standalone_question: StandaloneQuestionChain,
+    original_input: new RunnablePassthrough(),
+  },
+  {
+    context: retrieverChain,
+    question: ({ original_input }) => original_input.question,
   },
   answerChain,
 ]);
 
 const response = await chain.invoke({
   question:
-    "What are the technical requirements for running Scrimba? I only have a very old laptop which is not that powerful.",
+    "I want to become AI Engineer. Does Scrimba offer anything related to that?",
 });
 
 console.info(response);
