@@ -1,41 +1,67 @@
 import { ChatOpenAI } from "langchain/chat_models/openai";
-import { OpenAIEmbeddings } from "langchain/embeddings/openai";
 import { PromptTemplate } from "langchain/prompts";
-import { createClient } from "@supabase/supabase-js";
-import { SupabaseVectorStore } from "langchain/vectorstores/supabase";
 import { StringOutputParser } from "langchain/schema/output_parser";
+import { retriever } from "../utils/retriever";
+import { combineDocuments } from "../utils/combineDocuments";
+import {
+  RunnablePassthrough,
+  RunnableSequence,
+} from "langchain/schema/runnable";
 
 const openAIApiKey = process.env.OPENAI_API_KEY;
-const sbApiKey = process.env.SUPABASE_API_KEY;
-const sbUrl = process.env.SUPABASE_URL_LC_CHATBOT;
 
 const llm = new ChatOpenAI({ openAIApiKey });
-const embeddings = new OpenAIEmbeddings({ openAIApiKey });
-const sbClient = createClient(sbUrl, sbApiKey);
 
-const FAQVectorStore = new SupabaseVectorStore(embeddings, {
-  client: sbClient,
-  tableName: "documents",
-  queryName: "match_documents",
-});
+const standaloneQuestionPrompt =
+  PromptTemplate.fromTemplate(`Given a question, convert it into a standalone question.
+question: {question} standalone question:`);
 
-const retriever = FAQVectorStore.asRetriever();
+const answerPrompt = PromptTemplate.fromTemplate(`
+You are an empathetic and friendly human doing support today. You try your best to find the answer in the given context, but if you are not able to you will politely suggest them to reach out support@scrimba.com. Ofcourse, don't make up the answer and always respond as if you're talking to a friend!
+context: {context}
+question: {question}
+answer:
+`);
 
-const standaloneQuestionTemplate = `Given a question, convert it into a standalone question.
-question: {question} standalone question:
-`;
-
-const standaloneQuestionPrompt = PromptTemplate.fromTemplate(
-  standaloneQuestionTemplate
-);
-const chain = standaloneQuestionPrompt
+// old
+/**
+ const chain = standaloneQuestionPrompt
   .pipe(llm)
   .pipe(new StringOutputParser())
-  .pipe(retriever);
+  .pipe(retriever)
+  .pipe(combineDocuments);
+ */
 
-const relavantFAQResponse = await chain.invoke({
+// new
+const StandaloneQuestionChain = RunnableSequence.from([
+  standaloneQuestionPrompt,
+  llm,
+  new StringOutputParser(),
+]);
+
+const contextChain = RunnableSequence.from([
+  StandaloneQuestionChain,
+  retriever,
+  combineDocuments,
+]);
+
+const answerChain = RunnableSequence.from([
+  answerPrompt,
+  llm,
+  new StringOutputParser(),
+]);
+
+const chain = RunnableSequence.from([
+  {
+    context: contextChain,
+    question: StandaloneQuestionChain,
+  },
+  answerChain,
+]);
+
+const response = await chain.invoke({
   question:
     "What are the technical requirements for running Scrimba? I only have a very old laptop which is not that powerful.",
 });
 
-console.info(relavantFAQResponse);
+console.info(response);
