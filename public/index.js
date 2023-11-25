@@ -1,4 +1,4 @@
-document.addEventListener("submit", (e) => {
+document.querySelector("form").addEventListener("submit", (e) => {
   e.preventDefault();
   progressConversation();
 });
@@ -17,6 +17,17 @@ async function progressConversation() {
   chatbotConversation.appendChild(newHumanSpeechBubble);
   newHumanSpeechBubble.textContent = question;
   chatbotConversation.scrollTop = chatbotConversation.scrollHeight;
+
+  // getting the result
+  let response = await fetch("/question", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ question: question }),
+  });
+  response = await response.json();
+  let result = response.answer;
 
   // add AI message
   const newAiSpeechBubble = document.createElement("div");

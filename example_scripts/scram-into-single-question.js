@@ -23,16 +23,6 @@ question: {question}
 answer:
 `);
 
-// old
-/**
- const chain = standaloneQuestionPrompt
-  .pipe(llm)
-  .pipe(new StringOutputParser())
-  .pipe(retriever)
-  .pipe(combineDocuments);
- */
-
-// new
 const StandaloneQuestionChain = RunnableSequence.from([
   standaloneQuestionPrompt,
   llm,
@@ -63,9 +53,10 @@ const chain = RunnableSequence.from([
   answerChain,
 ]);
 
-const response = await chain.invoke({
-  question:
-    "I want to become AI Engineer. Does Scrimba offer anything related to that?",
-});
+export { chain };
+// const response = await chain.invoke({
+//   question:
+//     "I want to become AI Engineer. Does Scrimba offer anything related to that?",
+// });
 
-console.info(response);
+// console.info(response);
