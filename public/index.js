@@ -36,3 +36,15 @@ async function progressConversation() {
   newAiSpeechBubble.textContent = result;
   chatbotConversation.scrollTop = chatbotConversation.scrollHeight;
 }
+
+function formatConvHistory(messages) {
+  return messages
+    .map((message, i) => {
+      if (i % 2 === 0) {
+        return `Human: ${message}`;
+      } else {
+        return `AI: ${message}`;
+      }
+    })
+    .join("\n");
+}
